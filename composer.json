@@ -1,0 +1,22 @@
+{
+    "name": "jedibc/betaseries",
+    "type": "library",
+    "description": "PHP client library of the BetaSeries web api",
+    "license": "WTF",
+
+    "authors": [
+        {
+            "name": "Bruno CHALOPIN",
+            "email": "bruno@chalopin.fr"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.3.2",
+        "guzzle/guzzle": "~3.1.1"
+    },
+
+    "require-dev": {
+        "monolog/monolog" : "1.4.0"
+    }
+}
