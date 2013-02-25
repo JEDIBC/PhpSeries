@@ -1,0 +1,4 @@
+PhpSeries
+=========
+
+BetaSeries PHP Library
