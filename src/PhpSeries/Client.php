@@ -77,7 +77,8 @@ class Client
      */
     public function setLogger(Logger $logger)
     {
-        $this->logger = $logger;
+        $this->guzzleClient = null;
+        $this->logger       = $logger;
 
         return $this;
     }
@@ -88,6 +89,14 @@ class Client
     public function getHost()
     {
         return $this->host;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->userAgent;
     }
 
     /**
@@ -222,15 +231,27 @@ class Client
             'summary'    => (int)$summary,
             'hide_notes' => (int)$hide_notes
         );
+
+        // handle season parameter
         if (!is_null($season)) {
+            if (!ctype_digit($season)) {
+                throw new \InvalidArgumentException("Invalid season");
+            }
             $params['season'] = $season;
         }
+
+        // Handle episode parameter
         if (!is_null($episode)) {
+            if (!ctype_digit($episode)) {
+                throw new \InvalidArgumentException("Invalid episode");
+            }
             if (is_null($season)) {
                 throw new \InvalidArgumentException('season not specified');
             }
             $params['episode'] = $episode;
         }
+
+        // handle token parameter
         if (!is_null($token)) {
             $params['token'] = $token;
         }
@@ -363,10 +384,20 @@ class Client
     public function showsVideos($url, $season = null, $episode = null)
     {
         $params = array();
+
+        // handle season parameter
         if (!is_null($season)) {
+            if (!ctype_digit($season)) {
+                throw new \InvalidArgumentException("Invalid season");
+            }
             $params['season'] = $season;
         }
+
+        // Handle episode parameter
         if (!is_null($episode)) {
+            if (!ctype_digit($episode)) {
+                throw new \InvalidArgumentException("Invalid episode");
+            }
             if (is_null($season)) {
                 throw new \InvalidArgumentException('season not specified');
             }
@@ -374,5 +405,107 @@ class Client
         }
 
         return $this->query('shows/videos/' . $url . '.json', $params);
+    }
+
+    /**
+     * Affiche les derniers sous-titres récupérés par BetaSeries, dans la limite de 100.
+     * Possibilité de spécifier la langue et/ou une série en particulier.
+     *
+     * @param null|string $language
+     * @param null|int    $number
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function subtitlesLast($language = null, $number = null)
+    {
+        $params = array();
+
+        // handle language parameter
+        if (!is_null($language)) {
+            if (!in_array($language, array('vo', 'vf'))) {
+                throw new \InvalidArgumentException("Language must be 'vo' or 'vf'");
+            }
+            $params['language'] = $language;
+        }
+
+        // handle number parameter
+        if (!is_null($number)) {
+            if (!ctype_digit($number)) {
+                throw new \InvalidArgumentException("Invalid number");
+            }
+            $params['number'] = $number;
+        }
+
+        return $this->query('subtitles/last.json', $params);
+    }
+
+    /**
+     * Affiche les sous-titres récupérés par BetaSeries d'une certaine série, dans la limite de 100.
+     * Possibilité de spécifier la langue et/ou une saison, un épisode en particulier.
+     *
+     * @param string      $url
+     * @param null|string $language
+     * @param null|int    $season
+     * @param null|int    $episode
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function subtitlesShow($url, $language = null, $season = null, $episode = null)
+    {
+        $params = array();
+
+        // handle language parameter
+        if (!is_null($language)) {
+            if (!in_array($language, array('vo', 'vf'))) {
+                throw new \InvalidArgumentException("Language must be 'vo' or 'vf'");
+            }
+            $params['language'] = $language;
+        }
+
+        // handle season parameter
+        if (!is_null($season)) {
+            if (!ctype_digit($season)) {
+                throw new \InvalidArgumentException("Invalid season");
+            }
+            $params['season'] = $season;
+        }
+
+        // Handle episode parameter
+        if (!is_null($episode)) {
+            if (!ctype_digit($episode)) {
+                throw new \InvalidArgumentException("Invalid episode");
+            }
+            if (is_null($season)) {
+                throw new \InvalidArgumentException('season not specified');
+            }
+            $params['episode'] = $episode;
+        }
+
+        return $this->query('subtitles/show/' . $url . '.json', $params);
+    }
+
+    /**
+     * Nouveau : Vous pouvez maintenant récupérer des sous-titres directement grâce au nom des fichiers vidéo
+     *
+     * @param string      $file
+     * @param null|string $language
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function subtitlesShowByFile($file, $language = null)
+    {
+        $params = array(
+            'file' => $file
+        );
+
+        // handle language parameter
+        if (!is_null($language)) {
+            if (!in_array($language, array('vo', 'vf'))) {
+                throw new \InvalidArgumentException("Language must be 'vo' or 'vf'");
+            }
+            $params['language'] = $language;
+        }
+
+        return $this->query('subtitles/show.json', $params);
     }
 }
