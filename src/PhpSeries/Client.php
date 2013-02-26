@@ -41,7 +41,7 @@ class Client
      * @param string $apiKey
      * @param string $userAgent
      */
-    public function __construct($apiKey, $userAgent = "BetaSeriesPHPClient")
+    public function __construct($apiKey, $userAgent = "PhpSeries")
     {
         $this->apiKey    = $apiKey;
         $this->userAgent = $userAgent;
@@ -235,7 +235,7 @@ class Client
         // handle season parameter
         if (!is_null($season)) {
             if (!ctype_digit($season)) {
-                throw new \InvalidArgumentException("Invalid season");
+                throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
         }
@@ -243,7 +243,7 @@ class Client
         // Handle episode parameter
         if (!is_null($episode)) {
             if (!ctype_digit($episode)) {
-                throw new \InvalidArgumentException("Invalid episode");
+                throw new \InvalidArgumentException("Invalid episode parameter");
             }
             if (is_null($season)) {
                 throw new \InvalidArgumentException('season not specified');
@@ -388,7 +388,7 @@ class Client
         // handle season parameter
         if (!is_null($season)) {
             if (!ctype_digit($season)) {
-                throw new \InvalidArgumentException("Invalid season");
+                throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
         }
@@ -396,7 +396,7 @@ class Client
         // Handle episode parameter
         if (!is_null($episode)) {
             if (!ctype_digit($episode)) {
-                throw new \InvalidArgumentException("Invalid episode");
+                throw new \InvalidArgumentException("Invalid episode parameter");
             }
             if (is_null($season)) {
                 throw new \InvalidArgumentException('season not specified');
@@ -431,7 +431,7 @@ class Client
         // handle number parameter
         if (!is_null($number)) {
             if (!ctype_digit($number)) {
-                throw new \InvalidArgumentException("Invalid number");
+                throw new \InvalidArgumentException("Invalid number parameter");
             }
             $params['number'] = $number;
         }
@@ -465,7 +465,7 @@ class Client
         // handle season parameter
         if (!is_null($season)) {
             if (!ctype_digit($season)) {
-                throw new \InvalidArgumentException("Invalid season");
+                throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
         }
@@ -508,4 +508,577 @@ class Client
 
         return $this->query('subtitles/show.json', $params);
     }
+
+    /**
+     * Affiche tous les épisodes diffusés les 8 derniers jours jusqu'aux 8 prochains jours.
+     *
+     * @return array
+     */
+    public function planningGeneral()
+    {
+        return $this->query('planning/general.json');
+    }
+
+    /**
+     * Affiche le planning du membre identifié ou d'un autre membre (l'accès varie selon les options vie privée de chaque membre).
+     * Vous pouvez rajouter le paramètre view pour n'afficher que les épisodes encore non-vus.
+     *
+     * @param null|string $token
+     * @param null|string $login
+     * @param bool        $unseenOnly
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function planningMember($token = null, $login = null, $unseenOnly = false)
+    {
+        $url    = 'planning/member.json';
+        $params = array();
+
+        // Check params
+        if (is_null($token) && is_null($login)) {
+            throw new \InvalidArgumentException("You must specify token or login");
+        }
+
+        // handle login parameter
+        if (!is_null($login)) {
+            $url = 'planning/member/' . $login . '.json';
+        }
+
+        // handle token parameter
+        if (!is_null($token)) {
+            $params['token'] = $token;
+        }
+
+        // handle view parameter
+        if (true === $unseenOnly) {
+            $params['view'] = 'unseen';
+        }
+
+        return $this->query($url, $params);
+    }
+
+    /**
+     * Identifie le membre avec son login et le hash MD5. Retourne le token à utiliser pour les requêtes futures.
+     *
+     * @param string $login
+     * @param string $md5Password
+     * @return array
+     */
+    public function membersAuth($login, $md5Password)
+    {
+        $params = array(
+            'login'    => $login,
+            'password' => $md5Password
+        );
+
+        return $this->query('members/auth.json', $params);
+    }
+
+    /**
+     * Récupère une clé à utiliser en paramètre de https://www.betaseries.com/oauth?key=<key> pour identifier l'utilisateur sans avoir à envoyer un mot de passe sur l'API.
+     * L'utilisateur est ensuite redirigé sur l'URL de callback que vous avez spécifiée.
+     *
+     * @param string $token
+     * @return array
+     */
+    public function memberOauth($token)
+    {
+        return $this->query('members/oauth.json', array('token' => $token));
+    }
+
+    /**
+     * Fonction sans action si ce n'est celle de vérifier si le token spécifié est actif.
+     *
+     * @param string $token
+     * @return array
+     */
+    public function memberIsActive($token)
+    {
+        return $this->query('members/is_active.json', array('token' => $token));
+    }
+
+    /**
+     * Détruit instantanément le token spécifié.
+     *
+     * @param string $token
+     * @return array
+     */
+    public function memberDestroy($token)
+    {
+        return $this->query('members/destroy.json', array('token' => $token));
+    }
+
+    /**
+     * Renvoie les informations principales du membre identifié ou d'un autre membre (l'accès varie selon les options vie privée de chaque membre).
+     * Si vous spécifiez le paramètre nodata, seuls le login et la date du cache seront retournés.
+     * Si vous spécifiez le paramètre since (valeur timestamp), l'API ne renverra les informations complètes que si elles ont été mises à jour depuis.
+     *
+     * @param null|string $token
+     * @param null|string $login
+     * @param bool        $nodata
+     * @param null|int    $since
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function memberInfos($token = null, $login = null, $nodata = false, $since = null)
+    {
+        $url    = 'members/infos.json';
+        $params = array();
+
+        // Check params
+        if (is_null($token) && is_null($login)) {
+            throw new \InvalidArgumentException("You must specify token or login");
+        }
+
+        // handle login parameter
+        if (!is_null($login)) {
+            $url = 'members/infos/' . $login . '.json';
+        }
+
+        // handle token parameter
+        if (!is_null($token)) {
+            $params['token'] = $token;
+        }
+
+        // handle nodata parameter
+        if (true === $nodata) {
+            $params['nodata'] = 1;
+        }
+
+        // handle since parameter
+        if (!is_null($since)) {
+            if (!ctype_digit($since)) {
+                throw new \InvalidArgumentException("Invalid since parameter");
+            }
+            $params['since'] = $since;
+        }
+
+        return $this->query($url, $params);
+    }
+
+    /**
+     * Liste les épisodes restant à regarder du membre identifié.
+     * Vous pouvez affiner par type de sous-titres : Tous (même les épisodes sans sous-titres), VF ou VF et VO.
+     * En spécifiant view=next, l'API ne retourne que le premier épisode de chaque série à regarder.
+     * Si vous spécifiez un nombre à view, les NN prochains épisodes seront retournés.
+     * Si vous spécifiez show, les épisodes à voir de cette série uniquement seront retournés.
+     *
+     * @param string          $token
+     * @param string          $subtitles
+     * @param null|string     $show
+     * @param null|string|int $view
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersEpisodes($token, $subtitles = 'all', $show = null, $view = null)
+    {
+        // handle sousTitres params
+        if (!in_array($subtitles, array('all', 'vovf', 'vf'))) {
+            throw new \InvalidArgumentException("Invalid subtitles parameter");
+        }
+        $url = 'members/episodes/' . $subtitles . '.json';
+
+        $params = array(
+            'token' => $token
+        );
+
+        // handle show parameter
+        if (!is_null($show)) {
+            $params['show'] = $show;
+        }
+
+        if (!is_null($view)) {
+            if (('next' !== $view) || !ctype_digit($view)) {
+                $params['view'] = $view;
+            }
+        }
+
+        return $this->query($url, $params);
+    }
+
+    /**
+     * Marque l'épisode episode de la saison season de la série url comme vu. Vous pouvez spécifier une note entre 1 et 5.
+     * Note : Si l'épisode marqué comme vu ne suit pas directement le précédent épisode vu, tous les épisodes entre les deux seront quand même marqués comme vus. Pour mettre à zéro une série, marquez l'épisode 0 de la saison 0.
+     *
+     * @param string   $token
+     * @param string   $url
+     * @param int      $season
+     * @param int      $episode
+     * @param null|int $note
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersWatched($token, $url, $season, $episode, $note = null)
+    {
+        // handle season parameter
+        if (!ctype_digit($season)) {
+            throw new \InvalidArgumentException("Invalid season parameter");
+        }
+
+        // Handle episode parameter
+        if (!ctype_digit($episode)) {
+            throw new \InvalidArgumentException("Invalid episode parameter");
+        }
+
+        $params = array(
+            'token'   => $token,
+            'season'  => $season,
+            'episode' => $episode
+        );
+
+        // handle note parameter
+        if (!is_null($note)) {
+            if (!in_array($note, array(1, 2, 3, 4, 5))) {
+                throw new \InvalidArgumentException("Invalid note parameter");
+            }
+        }
+
+        return $this->query('members/watched/' . $url . '.json', $params);
+    }
+
+    /**
+     * Donne une note entre 1 et 5 à l'épisode episode de la saison season de la série url.
+     * Note : Pour noter la série entière, il faut indiquer episode=0 et season=0.
+     *
+     * @param string $token
+     * @param string $url
+     * @param int    $season
+     * @param int    $episode
+     * @param int    $note
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersNote($token, $url, $season, $episode, $note)
+    {
+        // handle season parameter
+        if (!ctype_digit($season)) {
+            throw new \InvalidArgumentException("Invalid season parameter");
+        }
+
+        // Handle episode parameter
+        if (!ctype_digit($episode)) {
+            throw new \InvalidArgumentException("Invalid episode parameter");
+        }
+
+        // handle note parameter
+        if (!in_array($note, array(1, 2, 3, 4, 5))) {
+            throw new \InvalidArgumentException("Invalid note parameter");
+        }
+
+        $params = array(
+            'token'   => $token,
+            'season'  => $season,
+            'episode' => $episode,
+            'note'    => $note
+        );
+
+        return $this->query('members/note/' . $url . '.json', $params);
+    }
+
+    /**
+     * Marque l'épisode episode de la saison season de la série url comme récupéré.
+     *
+     * @param string $token
+     * @param string $url
+     * @param int    $season
+     * @param int    $episode
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersDownloaded($token, $url, $season, $episode)
+    {
+        // handle season parameter
+        if (!ctype_digit($season)) {
+            throw new \InvalidArgumentException("Invalid season parameter");
+        }
+
+        // Handle episode parameter
+        if (!ctype_digit($episode)) {
+            throw new \InvalidArgumentException("Invalid episode parameter");
+        }
+
+        $params = array(
+            'token'   => $token,
+            'season'  => $season,
+            'episode' => $episode
+        );
+
+        return $this->query('members/downloaded/' . $url . '.json', $params);
+    }
+
+    /**
+     * Afficher dans l'ordre chronologique les notifications reçues par le membre (nouveaux sous-titres, nouveaux épisodes sortis, etc.). En paramètres il peut être spécifié de commencer à partir d'un certain ID ou encore de limiter le nombre de résultats.
+     * Nous vous conseillons de ne pas utiliser l'argument "sort" si vous utilisez déjà "last_id", vous risqueriez de ne pas récupérer toutes les dernières notifications.
+     * Note : Si vous utilisez le paramètre "summary", l'API ne retournera que le nombre de notifications non-vues.
+     * Note : Chaque notification retournée par l'API sera automatiquement marquée comme vue et supprimée.
+     * Note : Le tri par défaut est ascendant (du plus vieux au plus récent).
+     *
+     * @param string      $token
+     * @param bool        $summary
+     * @param null|int    $number
+     * @param null|int    $last_id
+     * @param null|string $sort
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersNotifications($token, $summary = false, $number = null, $last_id = null, $sort = null)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        // handle sumary parameter
+        if (true === $summary) {
+            $params['summary'] = 'yes';
+        }
+
+        // handle number parameter
+        if (!is_null($number)) {
+            if (!ctype_digit($number)) {
+                throw new \InvalidArgumentException("Invalid number parameter");
+            }
+            $params['number'] = $number;
+        }
+
+        // handle last_id parameter
+        if (!is_null($last_id)) {
+            if (!ctype_digit($last_id)) {
+                throw new \InvalidArgumentException("Invalid last_id parameter");
+            }
+            $params['last_id'] = $last_id;
+        }
+
+        // handle sort parameter
+        if (!is_null($sort)) {
+            if (!in_array($sort, array('asc', 'desc'))) {
+                throw new \InvalidArgumentException("Invalid sort parameter");
+            }
+        }
+
+        return $this->query('members/notifictions.json', $params);
+    }
+
+    /**
+     * Pour voir (ou modifier si value est renseigné à 1 ou 0) l'option d'un membre identifié.
+     * Options autorisées en lecture : downloaded, notation, decalage
+     * Options autorisées en écriture : downloaded, notation, decalage
+     *
+     * @param string   $token
+     * @param string   $option
+     * @param null|int $value
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersOption($token, $option, $value = null)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        // handle option parameter
+        if (!in_array($option, array('downloaded', 'notation', 'decalage'))) {
+            throw new \InvalidArgumentException("Invalid option parameter");
+        }
+
+        // handle value parameter
+        if (!is_null($value)) {
+            if (!in_array($value, array(0, 1))) {
+                throw new \InvalidArgumentException("Invalid value parameter");
+            }
+            $params['value'] = $value;
+        }
+
+        return $this->query('members/option/' . $option . '.json', $params);
+    }
+
+    /**
+     * Crée instantanément un compte avec les identifiants et le mail spécifiés. (Taille maximale pour le login : 24 caractères)
+     *
+     * @param string $login
+     * @param string $password
+     * @param string $email
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function membersSignup($login, $password, $email)
+    {
+        // handle login parameter
+        if (strlen($login) > 24) {
+            throw new \InvalidArgumentException("login too long");
+        }
+
+        $params = array(
+            'login'    => $login,
+            'password' => $password,
+            'email'    => $email
+        );
+
+        return $this->query('members/signup.json', $params);
+    }
+
+    /**
+     * Retourne la liste d'amis soit de l'utilisateur identifié par son token, soit de l'utilisateur spécifié dans l'URL.
+     *
+     * @param null|string $token
+     * @param null|string $login
+     * @return array
+     */
+    public function membersFriends($token = null, $login = null)
+    {
+        $params = array();
+
+        // handle token parameter
+        if (!is_null($token)) {
+            $params['token'] = $token;
+        }
+
+        $url = 'members/friends.json';
+
+        // handle login parameter
+        if (!is_null($login)) {
+            $url = 'members/friends/' . $login . '.json';
+        }
+
+        return $this->query($url, $params);
+    }
+
+    /**
+     * Retourne la liste des badges soit de l'utilisateur identifié par son token, soit de l'utilisateur spécifié dans l'URL.
+     *
+     * @param null|string $token
+     * @param null|string $login
+     * @return array
+     */
+    public function membersBadges($token = null, $login = null)
+    {
+        $params = array();
+
+        // handle token parameter
+        if (!is_null($token)) {
+            $params['token'] = $token;
+        }
+
+        $url = 'members/badges.json';
+
+        // handle login parameter
+        if (!is_null($login)) {
+            $url = 'members/badges/' . $login . '.json';
+        }
+
+        return $this->query($url, $params);
+    }
+
+    /**
+     * Ajoute un utilisateur comme ami.
+     *
+     * @param string $token
+     * @param string $login
+     * @return array
+     */
+    public function membersAdd($token, $login)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('members/add/' . $login . '.json', $params);
+    }
+
+    /**
+     * Enlève un utilisateur des amis de l'utilisateur identifié.
+     *
+     * @param string $token
+     * @param string $login
+     * @return array
+     */
+    public function membersDelete($token, $login)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('members/delete/' . $login . '.json', $params);
+    }
+
+    /**
+     * Liste les 10 premiers membres dont le pseudo commence par le terme login.
+     *
+     * @param string $login
+     * @return array
+     */
+    public function membersSearch($login)
+    {
+        $params = array(
+            'login' => $login
+        );
+
+        return $this->query('members/search.json', $params);
+    }
+
+    /**
+     * Bloque le membre spécifié.
+     *
+     * @param string $token
+     * @param string $login
+     * @return array
+     */
+    public function membersBlock($token, $login)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('members/block/' . $login . '.json', $params);
+    }
+
+    /**
+     * Débloque le membre spécifié.
+     *
+     * @param string $token
+     * @param string $login
+     * @return array
+     */
+    public function membersUnblock($token, $login)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('members/unblock/' . $login . '.json', $params);
+    }
+
+    /**
+     * Récupère les options du membre. Pour le moment, les sources de sous-titres qu'il a sélectionnées.
+     *
+     * @param string $token
+     * @return array
+     */
+    public function membersOptions($token)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('members/options.json', $params);
+    }
+
+    /**
+     * Retourne la liste des amis de l'utilisateur identifié par son token et qui correspondent aux adresses email soumises.
+     * Le paramètre mail accepte une ou plusieurs adresses email.
+     * Elles doivent être séparées par une virgule.
+     *
+     * @param string $token
+     * @param string $mail
+     * @return array
+     */
+    public function membersSync($token, $mail)
+    {
+        $params = array(
+            'token' => $token,
+            'mail'  => $mail
+        );
+
+        return $this->query('members/sync.json', $params);
+    }
+
 }
