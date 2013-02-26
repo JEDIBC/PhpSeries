@@ -1,5 +1,5 @@
 {
-    "name": "jedibc/betaseries",
+    "name": "jedibc/phpseries",
     "type": "library",
     "description": "PHP client library of the BetaSeries web api",
     "license": "WTF",
