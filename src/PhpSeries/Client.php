@@ -1081,4 +1081,173 @@ class Client
         return $this->query('members/sync.json', $params);
     }
 
+    /**
+     * Affiche les commentaires de la série spécifiée.
+     *
+     * @param string $url
+     * @return array
+     */
+    public function commentsShow($url)
+    {
+        return $this->query('comments/show/' . $url . '.json');
+    }
+
+    /**
+     * Affiche les commentaires de l'épisode spécifié.
+     *
+     * @param string $url
+     * @param int    $season
+     * @param int    $episode
+     * @return array
+     */
+    public function commentsEpisode($url, $season, $episode)
+    {
+        $params = array(
+            'season'  => $season,
+            'episode' => $episode
+        );
+
+        return $this->query('comments/episode/' . $url . '.json', $params);
+    }
+
+    /**
+     * Affiche les commentaires du membre spécifié.
+     *
+     * @param string $login
+     * @return array
+     */
+    public function commentsMember($login)
+    {
+        return $this->query('comments/member/' . $login . '.json');
+    }
+
+    /**
+     * Poste un commentaire sur la fiche d'une série.
+     * Vous pouvez spécifier s'il s'agit d'une réponse à un autre commentaire en précisant son ID.
+     *
+     * @param string   $token
+     * @param string   $show
+     * @param string   $text
+     * @param null|int $in_reply_to
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function commentsPostShow($token, $show, $text, $in_reply_to = null)
+    {
+        $params = array(
+            'token' => $token,
+            'show'  => $show,
+            'text'  => $text
+        );
+
+        // handle in_reply_to parameter
+        if (!is_null($in_reply_to)) {
+            if (!ctype_digit($in_reply_to)) {
+                throw new \InvalidArgumentException('Invalid in_reply_to parameter');
+            }
+            $params['in_reply_to'] = $in_reply_to;
+        }
+
+        return $this->query('comments/post/show.json', $params);
+    }
+
+    /**
+     * Poste un commentaire sur la fiche d'un épisode.
+     * Vous pouvez spécifier s'il s'agit d'une réponse à un autre commentaire en précisant son ID.
+     *
+     * @param string   $token
+     * @param string   $show
+     * @param int      $season
+     * @param int      $episode
+     * @param string   $text
+     * @param null|int $in_reply_to
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function commentsPostEpisode($token, $show, $season, $episode, $text, $in_reply_to = null)
+    {
+        $params = array(
+            'token'   => $token,
+            'show'    => $show,
+            'season'  => $season,
+            'episode' => $episode,
+            'text'    => $text
+        );
+
+        // handle in_reply_to parameter
+        if (!is_null($in_reply_to)) {
+            if (!ctype_digit($in_reply_to)) {
+                throw new \InvalidArgumentException('Invalid in_reply_to parameter');
+            }
+            $params['in_reply_to'] = $in_reply_to;
+        }
+
+        return $this->query('comments/post/episode.json', $params);
+    }
+
+    /**
+     * Poste un commentaire sur le profil d'un membre.
+     * Vous pouvez spécifier s'il s'agit d'une réponse à un autre commentaire en précisant son ID.
+     *
+     * @param string     $token
+     * @param string     $member
+     * @param string     $text
+     * @param null|int   $in_reply_to
+     * @return array
+     * @throws \InvalidArgumentException
+     *
+     */
+    public function commentsPostMember($token, $member, $text, $in_reply_to = null)
+    {
+        $params = array(
+            'token'  => $token,
+            'member' => $member,
+            'text'   => $text
+        );
+
+        // handle in_reply_to parameter
+        if (!is_null($in_reply_to)) {
+            if (!ctype_digit($in_reply_to)) {
+                throw new \InvalidArgumentException('Invalid in_reply_to parameter');
+            }
+            $params['in_reply_to'] = $in_reply_to;
+        }
+
+        return $this->query('comments/post/member.json', $params);
+    }
+
+    /**
+     * Inscrit l'utilisateur identifié aux notifications par mail des nouveaux commentaires de l'ID de référence spécifié (ref_id est renvoyé dans les affichages de commentaires).
+     *
+     * @param string $token
+     * @param int    $ref_id
+     * @return array
+     */
+    public function commentsSubscribe($token, $ref_id)
+    {
+        $params = array(
+            'token'  => $token,
+            'ref_id' => $ref_id
+        );
+
+        return $this->query('comments/subscribe.json', $params);
+    }
+
+    /**
+     * Désinscrit l'utilisateur identifié aux notifications par mail des nouveaux commentaires de l'ID de référence spécifié (ref_id est renvoyé dans les affichages de commentaires).
+     *
+     * @param string $token
+     * @param int    $ref_id
+     * @return array
+     */
+    public function commentsUnsubscribe($token, $ref_id)
+    {
+        $params = array(
+            'token'  => $token,
+            'ref_id' => $ref_id
+        );
+
+        return $this->query('comments/unsubscribe.json', $params);
+    }
+
 }
