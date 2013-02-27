@@ -123,13 +123,21 @@ class Client
     /**
      * @param string $url
      * @param array  $params
-     * @return array
+     * @param string $method
+     * @return mixed
+     * @throws \InvalidArgumentException
      */
-    protected function query($url, $params = array())
+    protected function query($url, $params = array(), $method = 'get')
     {
         $params = array_merge(array('key' => $this->apiKey), $params);
 
-        return $this->handleJsonResponse($this->getGuzzleClient()->get($url . '?' . http_build_query($params))->send());
+        if ('get' === $method) {
+            return $this->handleJsonResponse($this->getGuzzleClient()->get($url . '?' . http_build_query($params))->send());
+        } else if ('post' === $method) {
+            return $this->handleJsonResponse($this->getGuzzleClient()->post($url, null, $params)->send());
+        } else {
+            throw new \InvalidArgumentException('Invalid method parameter');
+        }
     }
 
     /**
@@ -1326,4 +1334,110 @@ class Client
         return $this->query('timeline/member/' . $member . '.json', $params);
     }
 
+    /**
+     * Affiche la liste derniers messages dans la boîte de réception dans l'ordre antéchronologique, par page de 15.
+     *
+     * @param string   $token
+     * @param null|int $page
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function messagesInbox($token, $page = null)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        if (!is_null($page)) {
+            if (!ctype_digit($page)) {
+                throw new \InvalidArgumentException('Invalid page parameter');
+            }
+            $params['page'] = $page;
+        }
+
+        return $this->query('messages/inbox.json', $params);
+    }
+
+    /**
+     * Affiche les messages de la discussion spécifiée dans l'ordre chronologique, par page de 15.
+     * Note : La discussion est automatiquement marquée comme étant lue
+     *
+     * @param string   $token
+     * @param int      $id
+     * @param null|int $page
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function messagesDiscussion($token, $id, $page = null)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        if (!is_null($page)) {
+            if (!ctype_digit($page)) {
+                throw new \InvalidArgumentException('Invalid page parameter');
+            }
+            $params['page'] = $page;
+        }
+
+        return $this->query('messages/discussion/' . $id . '.json', $params);
+    }
+
+    /**
+     * Envoie un nouveau message, démarre une discussion en spécifiant title et récipient.
+     *
+     * @param string $token
+     * @param string $title
+     * @param string $text
+     * @param string $recipient
+     * @return mixed
+     */
+    public function messagesSendNew($token, $title, $text, $recipient)
+    {
+        $params = array(
+            'token'     => $token,
+            'title'     => $title,
+            'text'      => $text,
+            'recipient' => $recipient
+        );
+
+        return $this->query('messages/send.json', $params, 'post');
+    }
+
+    /**
+     * Envoie un nouveau message, une réponse à une discussion en spécifiant discussion_id.
+     *
+     * @param string $token
+     * @param string $text
+     * @param int    $discussion_id
+     * @return mixed
+     */
+    public function messagesSendResponse($token, $text, $discussion_id)
+    {
+        $params = array(
+            'token'         => $token,
+            'text'          => $text,
+            'discussion_id' => $discussion_id
+        );
+
+        return $this->query('messages/send.json', $params, 'post');
+    }
+
+    /**
+     * Supprime le message avec l'ID spécifié.
+     * Attention, s'il s'agit du premier message d'une discussion alors toute la discussion sera supprimée.
+     *
+     * @param string $token
+     * @param int    $id
+     * @return mixed
+     */
+    public function messagesDelete($token, $id)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        return $this->query('messages/delete/' . $id . '.json', $params);
+    }
 }
