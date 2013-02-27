@@ -1250,4 +1250,80 @@ class Client
         return $this->query('comments/unsubscribe.json', $params);
     }
 
+    /**
+     * Affiche les N derniers évènements du site. Maximum 100.
+     *
+     * @param null|int $number
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function timelineHome($number = null)
+    {
+        $params = array();
+
+        // handle number parameter
+        if (!is_null($number)) {
+            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+                throw new \InvalidArgumentException('Invalid number parameter');
+            }
+            $params['number'] = $number;
+        }
+
+        return $this->query('timeline/home.json', $params);
+    }
+
+    /**
+     * Affiche les N derniers évènements des amis du membre identifié. Maximum 100.
+     *
+     * @param string   $token
+     * @param null|int $number
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function timelineFriends($token, $number = null)
+    {
+        $params = array(
+            'token' => $token
+        );
+
+        // handle number parameter
+        if (!is_null($number)) {
+            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+                throw new \InvalidArgumentException('Invalid number parameter');
+            }
+            $params['number'] = $number;
+        }
+
+        return $this->query('timeline/friends.json', $params);
+    }
+
+    /**
+     * Affiche les N derniers évènements de login (l'accès varie selon les options vie privée de chaque membre). Maximum 100.
+     *
+     * @param string      $member
+     * @param null|string $token
+     * @param null|int    $number
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    public function timelineMember($member, $token = null, $number = null)
+    {
+        $params = array();
+
+        // handle token parameter
+        if (!is_null($token)) {
+            $params['token'] = $token;
+        }
+
+        // handle number parameter
+        if (!is_null($number)) {
+            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+                throw new \InvalidArgumentException('Invalid number parameter');
+            }
+            $params['number'] = $number;
+        }
+
+        return $this->query('timeline/member/' . $member . '.json', $params);
+    }
+
 }
