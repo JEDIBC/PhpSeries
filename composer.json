@@ -18,5 +18,11 @@
 
     "require-dev": {
         "monolog/monolog" : "1.4.0"
-    }
+    },
+
+    "autoload":{
+        "psr-0":{
+            "PhpSeries":"src/"
+        }
+    }    
 }
