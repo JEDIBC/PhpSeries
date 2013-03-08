@@ -861,6 +861,7 @@ class Client
             if (!in_array($sort, array('asc', 'desc'))) {
                 throw new \InvalidArgumentException("Invalid sort parameter");
             }
+	    $params['sort'] = $sort;
         }
 
         return $this->query('members/notifictions.json', $params);
