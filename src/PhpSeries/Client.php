@@ -919,7 +919,7 @@ class Client
         $params = array(
             'login'    => $login,
             'password' => $password,
-            'email'    => $email
+            'mail'    => $email
         );
 
         return $this->query('members/signup.json', $params);
