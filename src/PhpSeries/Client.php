@@ -864,7 +864,7 @@ class Client
             $params['sort'] = $sort;
         }
 
-        return $this->query('members/notifictions.json', $params);
+        return $this->query('members/notifications.json', $params);
     }
 
     /**
