@@ -242,7 +242,7 @@ class Client
 
         // handle season parameter
         if (!is_null($season)) {
-            if (!ctype_digit($season)) {
+            if (!ctype_digit((string)$season)) {
                 throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
@@ -250,7 +250,7 @@ class Client
 
         // Handle episode parameter
         if (!is_null($episode)) {
-            if (!ctype_digit($episode)) {
+            if (!ctype_digit((string)$episode)) {
                 throw new \InvalidArgumentException("Invalid episode parameter");
             }
             if (is_null($season)) {
@@ -395,7 +395,7 @@ class Client
 
         // handle season parameter
         if (!is_null($season)) {
-            if (!ctype_digit($season)) {
+            if (!ctype_digit((string)$season)) {
                 throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
@@ -403,7 +403,7 @@ class Client
 
         // Handle episode parameter
         if (!is_null($episode)) {
-            if (!ctype_digit($episode)) {
+            if (!ctype_digit((string)$episode)) {
                 throw new \InvalidArgumentException("Invalid episode parameter");
             }
             if (is_null($season)) {
@@ -438,7 +438,7 @@ class Client
 
         // handle number parameter
         if (!is_null($number)) {
-            if (!ctype_digit($number)) {
+            if (!ctype_digit((string)$number)) {
                 throw new \InvalidArgumentException("Invalid number parameter");
             }
             $params['number'] = $number;
@@ -472,7 +472,7 @@ class Client
 
         // handle season parameter
         if (!is_null($season)) {
-            if (!ctype_digit($season)) {
+            if (!ctype_digit((string)$season)) {
                 throw new \InvalidArgumentException("Invalid season parameter");
             }
             $params['season'] = $season;
@@ -480,7 +480,7 @@ class Client
 
         // Handle episode parameter
         if (!is_null($episode)) {
-            if (!ctype_digit($episode)) {
+            if (!ctype_digit((string)$episode)) {
                 throw new \InvalidArgumentException("Invalid episode");
             }
             if (is_null($season)) {
@@ -655,7 +655,7 @@ class Client
 
         // handle since parameter
         if (!is_null($since)) {
-            if (!ctype_digit($since)) {
+            if (!ctype_digit((string)$since)) {
                 throw new \InvalidArgumentException("Invalid since parameter");
             }
             $params['since'] = $since;
@@ -696,7 +696,7 @@ class Client
         }
 
         if (!is_null($view)) {
-            if (('next' !== $view) || !ctype_digit($view)) {
+            if (('next' !== $view) || !ctype_digit((string)$view)) {
                 $params['view'] = $view;
             }
         }
@@ -719,12 +719,12 @@ class Client
     public function membersWatched($token, $url, $season, $episode, $note = null)
     {
         // handle season parameter
-        if (!ctype_digit($season)) {
+        if (!ctype_digit((string)$season)) {
             throw new \InvalidArgumentException("Invalid season parameter");
         }
 
         // Handle episode parameter
-        if (!ctype_digit($episode)) {
+        if (!ctype_digit((string)$episode)) {
             throw new \InvalidArgumentException("Invalid episode parameter");
         }
 
@@ -759,12 +759,12 @@ class Client
     public function membersNote($token, $url, $season, $episode, $note)
     {
         // handle season parameter
-        if (!ctype_digit($season)) {
+        if (!ctype_digit((string)$season)) {
             throw new \InvalidArgumentException("Invalid season parameter");
         }
 
         // Handle episode parameter
-        if (!ctype_digit($episode)) {
+        if (!ctype_digit((string)$episode)) {
             throw new \InvalidArgumentException("Invalid episode parameter");
         }
 
@@ -796,12 +796,12 @@ class Client
     public function membersDownloaded($token, $url, $season, $episode)
     {
         // handle season parameter
-        if (!ctype_digit($season)) {
+        if (!ctype_digit((string)$season)) {
             throw new \InvalidArgumentException("Invalid season parameter");
         }
 
         // Handle episode parameter
-        if (!ctype_digit($episode)) {
+        if (!ctype_digit((string)$episode)) {
             throw new \InvalidArgumentException("Invalid episode parameter");
         }
 
@@ -842,7 +842,7 @@ class Client
 
         // handle number parameter
         if (!is_null($number)) {
-            if (!ctype_digit($number)) {
+            if (!ctype_digit((string)$number)) {
                 throw new \InvalidArgumentException("Invalid number parameter");
             }
             $params['number'] = $number;
@@ -850,7 +850,7 @@ class Client
 
         // handle last_id parameter
         if (!is_null($last_id)) {
-            if (!ctype_digit($last_id)) {
+            if (!ctype_digit((string)$last_id)) {
                 throw new \InvalidArgumentException("Invalid last_id parameter");
             }
             $params['last_id'] = $last_id;
@@ -1151,7 +1151,7 @@ class Client
 
         // handle in_reply_to parameter
         if (!is_null($in_reply_to)) {
-            if (!ctype_digit($in_reply_to)) {
+            if (!ctype_digit((string)$in_reply_to)) {
                 throw new \InvalidArgumentException('Invalid in_reply_to parameter');
             }
             $params['in_reply_to'] = $in_reply_to;
@@ -1185,7 +1185,7 @@ class Client
 
         // handle in_reply_to parameter
         if (!is_null($in_reply_to)) {
-            if (!ctype_digit($in_reply_to)) {
+            if (!ctype_digit((string)$in_reply_to)) {
                 throw new \InvalidArgumentException('Invalid in_reply_to parameter');
             }
             $params['in_reply_to'] = $in_reply_to;
@@ -1216,7 +1216,7 @@ class Client
 
         // handle in_reply_to parameter
         if (!is_null($in_reply_to)) {
-            if (!ctype_digit($in_reply_to)) {
+            if (!ctype_digit((string)$in_reply_to)) {
                 throw new \InvalidArgumentException('Invalid in_reply_to parameter');
             }
             $params['in_reply_to'] = $in_reply_to;
@@ -1272,7 +1272,7 @@ class Client
 
         // handle number parameter
         if (!is_null($number)) {
-            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+            if (!ctype_digit((string)$number) || (0 === $number) || (100 < $number)) {
                 throw new \InvalidArgumentException('Invalid number parameter');
             }
             $params['number'] = $number;
@@ -1297,7 +1297,7 @@ class Client
 
         // handle number parameter
         if (!is_null($number)) {
-            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+            if (!ctype_digit((string)$number) || (0 === $number) || (100 < $number)) {
                 throw new \InvalidArgumentException('Invalid number parameter');
             }
             $params['number'] = $number;
@@ -1326,7 +1326,7 @@ class Client
 
         // handle number parameter
         if (!is_null($number)) {
-            if (!ctype_digit($number) || (0 === $number) || (100 < $number)) {
+            if (!ctype_digit((string)$number) || (0 === $number) || (100 < $number)) {
                 throw new \InvalidArgumentException('Invalid number parameter');
             }
             $params['number'] = $number;
@@ -1350,7 +1350,7 @@ class Client
         );
 
         if (!is_null($page)) {
-            if (!ctype_digit($page)) {
+            if (!ctype_digit((string)$page)) {
                 throw new \InvalidArgumentException('Invalid page parameter');
             }
             $params['page'] = $page;
@@ -1376,7 +1376,7 @@ class Client
         );
 
         if (!is_null($page)) {
-            if (!ctype_digit($page)) {
+            if (!ctype_digit((string)$page)) {
                 throw new \InvalidArgumentException('Invalid page parameter');
             }
             $params['page'] = $page;
