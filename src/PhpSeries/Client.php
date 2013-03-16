@@ -328,7 +328,7 @@ class Client
      * @param string $file
      * @return array
      */
-    public function showsScrapper($file)
+    public function showsScraper($file)
     {
         return $this->query('shows/scraper.json', array('file' => $file));
     }
