@@ -1,28 +1,30 @@
 {
-    "name": "jedibc/phpseries",
-    "type": "library",
+    "name"       : "jedibc/phpseries",
+    "type"       : "library",
     "description": "PHP client library of the BetaSeries web api",
-    "license": "WTF",
+    "license"    : "MIT",
 
     "authors": [
         {
-            "name": "Bruno CHALOPIN",
+            "name" : "Bruno CHALOPIN",
             "email": "bruno@chalopin.fr"
         }
     ],
 
     "require": {
-        "php": ">=5.3.2",
-        "guzzle/guzzle": ">=3.0, <3.4"
+        "php"              : ">=5.4.0",
+        "guzzlehttp/guzzle": "~4.0"
     },
 
     "require-dev": {
-        "monolog/monolog" : "1.4.0"
+        "psr/log"        : "~1.0",
+        "phpunit/phpunit": "~4.0",
+        "mockery/mockery": "dev-master"
     },
 
-    "autoload":{
-        "psr-0":{
-            "PhpSeries":"src/"
+    "autoload": {
+        "psr-4": {
+            "PhpSeries": "src/"
         }
-    }    
+    }
 }
