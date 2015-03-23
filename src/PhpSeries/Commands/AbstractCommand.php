@@ -2,9 +2,8 @@
 namespace PhpSeries\Commands;
 
 use Guzzle\Http\ClientInterface;
-use Guzzle\Http\Message\RequestInterface;
+use Guzzle\Http\Message\Response;
 use PhpSeries\Exceptions\BetaSeriesException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class AbstractCommand
@@ -49,38 +48,43 @@ abstract class AbstractCommand implements CommandInterface
     }
 
     /**
+     * @return array
+     */
+    abstract protected function resolveParameters(array $parameters);
+
+    /**
      * @param string $method
      * @param string $url
+     * @param array  $parameters
      *
-     * @return RequestInterface
+     * @return Response
      */
-    protected function getRequest($method, $url)
+    protected function getHttpResponse($method, $url, array $parameters = [])
     {
-        $headers = [
+        $method     = strtoupper($method);
+        $parameters = array_filter(
+            $this->resolveParameters($parameters),
+            function ($value) {
+                return is_array($value) ? !empty($value) : '' != trim((string) $value);
+            }
+        );
+        $url        = 'GET' == $method ? sprintf('%s?%s', $url, http_build_query($parameters)) : $url;
+        $body       = 'GET' == $method ? null : $parameters;
+        $headers    = [
             'X-BetaSeries-Version' => $this->apiVersion,
             'X-BetaSeries-Key'     => $this->apiKey,
             'Accept'               => 'application/json',
             'User-Agent'           => $this->userAgent
         ];
 
-        return $this->httpClient->createRequest(
-            strtoupper($method),
-            $url,
-            $headers
-        );
-    }
-
-    /**
-     * @param array $parameters
-     *
-     * @return array
-     */
-    protected function resolveParameters(array $parameters)
-    {
-        $optionResolver = new OptionsResolver();
-
-        return $optionResolver->setDefaults($this->getDefaultParameters())
-            ->resolve($parameters);
+        return $this->httpClient
+            ->createRequest(
+                $method,
+                $url,
+                $headers,
+                $body,
+                ['exceptions' => false]
+            )->send();
     }
 
     /**
@@ -102,11 +106,11 @@ abstract class AbstractCommand implements CommandInterface
 
         switch (json_last_error()) {
             case JSON_ERROR_NONE:
-                if (isset($jsonData['errors']['code'])) {
-                    $errorType      = substr($jsonData['errors']['code'], 0, 1);
+                if (isset($jsonData['errors'][0]['code'])) {
+                    $errorType      = substr($jsonData['errors'][0]['code'], 0, 1);
                     $exceptionClass = sprintf('\PhpSeries\Exceptions\%s', array_key_exists($errorType, $exceptionMapping) ? $exceptionMapping[$errorType] : 'BetaSeriesException');
 
-                    throw new $exceptionClass($jsonData['errors']['text'], $jsonData['errors']['code']);
+                    throw new $exceptionClass($jsonData['errors'][0]['text'], $jsonData['errors'][0]['code']);
                 }
 
                 return $jsonData;
@@ -133,25 +137,13 @@ abstract class AbstractCommand implements CommandInterface
     }
 
     /**
-     * @return array
-     */
-    abstract protected function getDefaultParameters();
-
-    /**
      * {@inheritdoc}
      */
     public function execute($method, $url, array $parameters)
     {
-        $request    = $this->getRequest($method, $url);
-        $parameters = $this->resolveParameters($parameters);
+        $response = $this->getHttpResponse($method, $url, $parameters);
 
-        foreach ($parameters as $key => $value) {
-            $request->getParams()->add($key, $value);
-        }
-
-        $response = $request->send();
-
-        if ($response->isError()) {
+        if ($response->isError() && empty($response->getBody(true))) {
             throw new BetaSeriesException(sprintf('Http error %s', $response->getStatusCode()));
         }
 
