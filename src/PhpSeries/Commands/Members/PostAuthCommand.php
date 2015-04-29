@@ -12,18 +12,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class PostAuthCommand extends AbstractCommand
 {
     /**
-     * @return array
+     * @param OptionsResolver $resolver
      */
-    protected function resolveParameters(array $parameters)
+    protected function configureParameters(OptionsResolver $resolver)
     {
-        return (new OptionsResolver())
-            ->setRequired(['login', 'password'])
+        $resolver->setRequired(['login', 'password'])
             ->setAllowedTypes(
                 [
                     'login'    => 'string',
                     'password' => 'string'
                 ]
-            )
-            ->resolve($parameters);
+            );
     }
 }

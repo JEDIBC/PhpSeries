@@ -4,6 +4,7 @@ namespace PhpSeries\Commands;
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Response;
 use PhpSeries\Exceptions\BetaSeriesException;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * Class AbstractCommand
@@ -34,23 +35,23 @@ abstract class AbstractCommand implements CommandInterface
     protected $userAgent;
 
     /**
-     * @param ClientInterface $guzzleClient
+     * @param ClientInterface $httpClient
      * @param string          $apiKey
      * @param string          $apiVersion
      * @param string          $userAgent
      */
-    public function __construct(ClientInterface $guzzleClient, $apiKey, $apiVersion, $userAgent)
+    public function __construct(ClientInterface $httpClient, $apiKey, $apiVersion, $userAgent)
     {
-        $this->httpClient = $guzzleClient;
+        $this->httpClient = $httpClient;
         $this->apiKey     = $apiKey;
         $this->apiVersion = $apiVersion;
         $this->userAgent  = $userAgent;
     }
 
     /**
-     * @return array
+     * @param OptionsResolver $resolver
      */
-    abstract protected function resolveParameters(array $parameters);
+    abstract protected function configureParameters(OptionsResolver $resolver);
 
     /**
      * @param string $method
@@ -61,22 +62,36 @@ abstract class AbstractCommand implements CommandInterface
      */
     protected function getHttpResponse($method, $url, array $parameters = [])
     {
-        $method     = strtoupper($method);
+        // define http method
+        $method = strtoupper($method);
+
+        // Resolve parameters
+        $resolver = new OptionsResolver();
+        $this->configureParameters($resolver);
+
+        // Filter resolved parameters to keep only non empty ones
         $parameters = array_filter(
-            $this->resolveParameters($parameters),
+            $resolver->resolve($parameters),
             function ($value) {
                 return is_array($value) ? !empty($value) : '' != trim((string) $value);
             }
         );
-        $url        = 'GET' == $method ? sprintf('%s?%s', $url, http_build_query($parameters)) : $url;
-        $body       = 'GET' == $method ? null : $parameters;
-        $headers    = [
+
+        // build url
+        $url = 'GET' == $method ? sprintf('%s?%s', $url, http_build_query($parameters)) : $url;
+
+        // build body
+        $body = 'GET' == $method ? null : $parameters;
+
+        // build headers
+        $headers = [
             'X-BetaSeries-Version' => $this->apiVersion,
             'X-BetaSeries-Key'     => $this->apiKey,
             'Accept'               => 'application/json',
             'User-Agent'           => $this->userAgent
         ];
 
+        // Execute query
         return $this->httpClient
             ->createRequest(
                 $method,
@@ -104,35 +119,18 @@ abstract class AbstractCommand implements CommandInterface
 
         $jsonData = json_decode($data, true);
 
-        switch (json_last_error()) {
-            case JSON_ERROR_NONE:
-                if (isset($jsonData['errors'][0]['code'])) {
-                    $errorType      = substr($jsonData['errors'][0]['code'], 0, 1);
-                    $exceptionClass = sprintf('\PhpSeries\Exceptions\%s', array_key_exists($errorType, $exceptionMapping) ? $exceptionMapping[$errorType] : 'BetaSeriesException');
+        if (JSON_ERROR_NONE === json_last_error()) {
+            if (isset($jsonData['errors'][0]['code'])) {
+                $errorType      = substr($jsonData['errors'][0]['code'], 0, 1);
+                $exceptionClass = sprintf('\PhpSeries\Exceptions\%s', array_key_exists($errorType, $exceptionMapping) ? $exceptionMapping[$errorType] : 'BetaSeriesException');
 
-                    throw new $exceptionClass($jsonData['errors'][0]['text'], $jsonData['errors'][0]['code']);
-                }
+                throw new $exceptionClass($jsonData['errors'][0]['text'], $jsonData['errors'][0]['code']);
+            }
 
-                return $jsonData;
-                break;
-            case JSON_ERROR_DEPTH:
-                throw new BetaSeriesException('Maximum stack depth exceeded');
-                break;
-            case JSON_ERROR_STATE_MISMATCH:
-                throw new BetaSeriesException('Underflow or the modes mismatch');
-                break;
-            case JSON_ERROR_CTRL_CHAR:
-                throw new BetaSeriesException('Unexpected control character found');
-                break;
-            case JSON_ERROR_SYNTAX:
-                throw new BetaSeriesException('Syntax error, malformed JSON');
-                break;
-            case JSON_ERROR_UTF8:
-                throw new BetaSeriesException('Malformed UTF-8 characters, possibly incorrectly encoded');
-                break;
-            default:
-                throw new BetaSeriesException('Unknown error');
-                break;
+            return $jsonData;
+        } else {
+            $msg = json_last_error_msg();
+            throw new BetaSeriesException(empty($msg) ? 'Unknown json error' : $msg);
         }
     }
 

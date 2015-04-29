@@ -6,6 +6,6 @@ namespace PhpSeries\Exceptions;
  *
  * @package PhpSeries\Exceptions
  */
-class ApiException extends \ErrorException
+class ApiException extends BetaSeriesException
 {
 }

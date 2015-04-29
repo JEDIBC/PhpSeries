@@ -12,18 +12,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class GetBadgesCommand extends AbstractCommand
 {
     /**
-     * @return array
+     * @param OptionsResolver $resolver
      */
-    protected function resolveParameters(array $parameters)
+    protected function configureParameters(OptionsResolver $resolver)
     {
-        return (new OptionsResolver())
-            ->setRequired(['token', 'id'])
+        $resolver->setRequired(['token', 'id'])
             ->setAllowedTypes(
                 [
                     'token' => 'string',
                     'id'    => 'integer'
                 ]
-            )
-            ->resolve($parameters);
+            );
     }
 }

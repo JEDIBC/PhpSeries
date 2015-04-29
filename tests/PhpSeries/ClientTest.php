@@ -1,5 +1,5 @@
 <?php
-namespace tests\PhpSeries;
+namespace Tests\PhpSeries;
 
 use Mockery as m;
 use PhpSeries\Client;
@@ -7,7 +7,7 @@ use PhpSeries\Client;
 /**
  * Class ClientTest
  *
- * @package tests\PhpSeries
+ * @package Tests\PhpSeries
  */
 class ClientTest extends \PHPUnit_Framework_TestCase
 {

@@ -6,6 +6,6 @@ namespace PhpSeries\Exceptions;
  *
  * @package PhpSeries\Exceptions
  */
-class UserException extends \ErrorException
+class UserException extends BetaSeriesException
 {
 }

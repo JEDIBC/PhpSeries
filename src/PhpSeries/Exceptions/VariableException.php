@@ -6,6 +6,6 @@ namespace PhpSeries\Exceptions;
  *
  * @package PhpSeries\Exceptions
  */
-class VariableException extends \ErrorException
+class VariableException extends BetaSeriesException
 {
 }

@@ -183,6 +183,18 @@ class Client
 
     /**
      * @param string $method
+     * @param string $category
+     * @param string $action
+     *
+     * @return string
+     */
+    protected function getClassName($method, $category, $action)
+    {
+        return sprintf('\PhpSeries\Commands\%s\%sCommand', ucfirst($category), $method . ucfirst($action));
+    }
+
+    /**
+     * @param string $method
      * @param string $apiMethod
      * @param array  $parameters
      *
@@ -192,7 +204,7 @@ class Client
     protected function executeCommand($method, $apiMethod, array $parameters = [])
     {
         list($category, $action) = explode('/', strtolower($apiMethod));
-        $className = sprintf('\PhpSeries\Commands\%s\%sCommand', ucfirst($category), $method . ucfirst($action));
+        $className = $this->getClassName($method, $category, $action);
 
         if (!class_exists($className)) {
             throw new BetaSeriesException(sprintf("The API command %s %s doesn't exist", $method, $apiMethod));

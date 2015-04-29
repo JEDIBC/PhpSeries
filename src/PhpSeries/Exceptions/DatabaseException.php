@@ -6,6 +6,6 @@ namespace PhpSeries\Exceptions;
  *
  * @package PhpSeries\Exceptions
  */
-class DatabaseException extends \ErrorException
+class DatabaseException extends BetaSeriesException
 {
 }
