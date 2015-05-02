@@ -40,7 +40,7 @@ abstract class AbstractCommand implements CommandInterface
      * @param string          $apiVersion
      * @param string          $userAgent
      */
-    public function __construct(ClientInterface $httpClient, $apiKey, $apiVersion, $userAgent)
+    public function __construct(ClientInterface $httpClient, $apiKey, $apiVersion = '2.4', $userAgent = 'PhpSeries')
     {
         $this->httpClient = $httpClient;
         $this->apiKey     = $apiKey;
@@ -117,7 +117,7 @@ abstract class AbstractCommand implements CommandInterface
             4 => 'DatabaseException',
         ];
 
-        $jsonData = json_decode($data, true);
+        $jsonData = @json_decode($data, true);
 
         if (JSON_ERROR_NONE === json_last_error()) {
             if (isset($jsonData['errors'][0]['code'])) {
@@ -137,12 +137,16 @@ abstract class AbstractCommand implements CommandInterface
     /**
      * {@inheritdoc}
      */
-    public function execute($method, $url, array $parameters)
+    public function execute($method, $url, array $parameters = [])
     {
         $response = $this->getHttpResponse($method, $url, $parameters);
 
-        if ($response->isError() && empty($response->getBody(true))) {
-            throw new BetaSeriesException(sprintf('Http error %s', $response->getStatusCode()));
+        if ($response->isError()) {
+            throw new BetaSeriesException(sprintf('Http error %d', $response->getStatusCode()));
+        }
+
+        if (empty($response->getBody(true))) {
+            throw new BetaSeriesException('Empty response');
         }
 
         return $this->jsonDecode($response->getBody(true));

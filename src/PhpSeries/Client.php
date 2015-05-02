@@ -5,7 +5,6 @@ use Guzzle\Http\Client as HttpClient;
 use Guzzle\Http\ClientInterface;
 use PhpSeries\Commands\AbstractCommand;
 use PhpSeries\Exceptions\BetaSeriesException;
-use Psr\Log\LoggerInterface;
 
 /**
  * Class Client
@@ -34,11 +33,6 @@ class Client
      * @var string
      */
     protected $userAgent;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var ClientInterface
@@ -138,26 +132,6 @@ class Client
     }
 
     /**
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * @param LoggerInterface $logger
-     *
-     * @return Client
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    /**
      * @return ClientInterface
      */
     public function getHttpClient()
@@ -190,7 +164,7 @@ class Client
      */
     protected function getClassName($method, $category, $action)
     {
-        return sprintf('\PhpSeries\Commands\%s\%sCommand', ucfirst($category), $method . ucfirst($action));
+        return sprintf('\PhpSeries\Commands\%s\%sCommand', $category, $method . $action);
     }
 
     /**
@@ -204,6 +178,13 @@ class Client
     protected function executeCommand($method, $apiMethod, array $parameters = [])
     {
         list($category, $action) = explode('/', strtolower($apiMethod));
+
+        // format strings
+        $method   = ucfirst(strtolower($method));
+        $category = ucfirst(strtolower($category));
+        $action   = ucfirst(strtolower($action));
+
+        // get command class name
         $className = $this->getClassName($method, $category, $action);
 
         if (!class_exists($className)) {
@@ -224,7 +205,7 @@ class Client
      */
     public function get($apiMethod, array $parameters = [])
     {
-        return $this->executeCommand('Get', $apiMethod, $parameters);
+        return $this->executeCommand('GET', $apiMethod, $parameters);
     }
 
     /**
@@ -235,7 +216,7 @@ class Client
      */
     public function post($apiMethod, array $parameters = [])
     {
-        return $this->executeCommand('Post', $apiMethod, $parameters);
+        return $this->executeCommand('POST', $apiMethod, $parameters);
     }
 
     /**
@@ -246,6 +227,6 @@ class Client
      */
     public function delete($apiMethod, array $parameters = [])
     {
-        return $this->executeCommand('Delete', $apiMethod, $parameters);
+        return $this->executeCommand('DELETE', $apiMethod, $parameters);
     }
 }
