@@ -17,6 +17,18 @@ The recommended way to install the library is through [Composer](http://getcompo
     }
 }
 ```
+## Usage
+
+```php
+$client = new PhpSeries\Client('<myApiKey>');
+
+// authenticate using basic login/password to get a token
+$authData = $client->post('members/auth', ['login' => 'foo', 'password' => md5('bar')]);
+
+// Get badges list of user 1
+$badges = $client->get('members/badges', ['token' => $authData['member']['token'], 'id' => 1]);
+
+```
 
 ## License
 
