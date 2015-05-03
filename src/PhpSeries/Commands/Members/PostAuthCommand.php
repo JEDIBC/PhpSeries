@@ -16,12 +16,13 @@ class PostAuthCommand extends AbstractCommand
      */
     protected function configureParameters(OptionsResolver $resolver)
     {
-        $resolver->setRequired(['login', 'password'])
-            ->setAllowedTypes(
-                [
-                    'login'    => 'string',
-                    'password' => 'string'
-                ]
-            );
+        $resolver->setRequired(['login', 'password']);
+
+        $resolver->setAllowedTypes(
+            [
+                'login'    => 'string',
+                'password' => 'string'
+            ]
+        );
     }
 }
