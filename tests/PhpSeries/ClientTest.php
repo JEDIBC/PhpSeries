@@ -87,7 +87,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @expectedException \PhpSeries\Exceptions\BetaSeriesException
-     * @expectedExceptionMessage The API command Get foo/bar doesn't exist
+     * @expectedExceptionMessage The API command GET foo/bar doesn't exist
      */
     public function testExecuteCommandDoesntExist()
     {
@@ -113,7 +113,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $clientMock = m::mock('PhpSeries\Client', ['dummyKey'])->shouldDeferMissing();
 
-        $this->assertEquals('\PhpSeries\Commands\Foo\GetBarCommand', $clientMock->getClassName('Get', 'Foo', 'Bar'));
+        $this->assertEquals('\PhpSeries\Commands\Foo\GetBarCommand', $clientMock->getClassName('get', 'foo/bar'));
+        $this->assertEquals('\PhpSeries\Commands\Foo\PostBarGruCommand', $clientMock->getClassName('POST', 'foo/bar_gru'));
     }
 
 

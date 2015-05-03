@@ -5,22 +5,24 @@ use PhpSeries\Commands\AbstractCommand;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Class PostAuthCommand
+ * Class PostAccessTokenCommand
  *
  * @package PhpSeries\Commands\Members
  */
-class PostAuthCommand extends AbstractCommand
+class PostAccessTokenCommand extends AbstractCommand
 {
     /**
      * @param OptionsResolver $resolver
      */
     protected function configureParameters(OptionsResolver $resolver)
     {
-        $resolver->setRequired(['login', 'password'])
+        $resolver->setRequired(['client_id', 'client_secret', 'redirect_uri', 'code'])
             ->setAllowedTypes(
                 [
-                    'login'    => 'string',
-                    'password' => 'string'
+                    'client_id'     => 'string',
+                    'client_secret' => 'string',
+                    'redirect_uri'  => 'string',
+                    'code'          => 'string'
                 ]
             );
     }
