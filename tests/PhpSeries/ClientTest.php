@@ -101,7 +101,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testExecuteCommand()
     {
         $clientMock = m::mock('PhpSeries\Client[getClassName]', ['dummyKey'])->shouldAllowMockingProtectedMethods();
-        $clientMock->shouldReceive('getClassName')->once()->andReturn('Tests\PhpSeries\DummyCOmmand');
+        $clientMock->shouldReceive('getClassName')->once()->andReturn('Tests\PhpSeries\DummyCommand');
 
         $this->assertEquals(['foo' => 'bar'], $clientMock->get('foo/bar'));
     }
