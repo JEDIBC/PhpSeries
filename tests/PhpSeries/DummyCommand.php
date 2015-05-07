@@ -2,7 +2,7 @@
 namespace Tests\PhpSeries;
 
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class DummyCommand
@@ -12,10 +12,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class DummyCommand extends AbstractCommand
 {
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    protected function configureParameters(OptionsResolver $resolver)
+    protected function getConstraint()
     {
+        return new Assert\Collection();
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace Tests\PhpSeries\Commands;
 
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class TestCommand
@@ -12,18 +12,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class TestCommand extends AbstractCommand
 {
-
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    protected function configureParameters(OptionsResolver $resolver)
+    protected function getConstraint()
     {
-        $resolver->setRequired(['foo', 'gru'])->setAllowedTypes(
+        return new Assert\Collection(
             [
-                'foo' => 'string',
-                'gru' => 'string'
+                'fields' => [
+                    'foo' => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ],
+                    'gru' => [
+                        new Assert\Type('string')
+                    ]
+                ]
             ]
         );
     }
-
 }

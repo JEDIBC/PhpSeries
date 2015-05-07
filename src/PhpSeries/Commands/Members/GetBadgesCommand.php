@@ -2,7 +2,7 @@
 namespace PhpSeries\Commands\Members;
 
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class GetBadgesCommand
@@ -12,16 +12,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class GetBadgesCommand extends AbstractCommand
 {
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    protected function configureParameters(OptionsResolver $resolver)
+    protected function getConstraint()
     {
-        $resolver->setRequired(['token', 'id'])
-            ->setAllowedTypes(
-                [
-                    'token' => 'string',
-                    'id'    => 'integer'
+        return new Assert\Collection(
+            [
+                'fields' => [
+                    'token' => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ],
+                    'id'    => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('integer')
+                    ]
                 ]
-            );
+            ]
+        );
     }
 }

@@ -3,7 +3,7 @@ namespace Tests\PhpSeries\Commands;
 
 use Guzzle\Http\Client;
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Validation;
 
 /**
  * Class CommandTestCase
@@ -34,29 +34,38 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param array $parameters
+     *
+     * @return \Symfony\Component\Validator\ConstraintViolationListInterface
+     */
+    protected function getViolations(array $parameters)
+    {
+        $validator = Validation::createValidator();
+        $command   = $this->getCommand();
+
+        $reflexionObject = new \ReflectionObject($command);
+        $reflexionMethod = $reflexionObject->getMethod('getConstraint');
+        $reflexionMethod->setAccessible(true);
+
+        return $validator->validate($parameters, $reflexionMethod->invoke($command));
+    }
+
+    /**
      * @param string $parameter
      * @param mixed  $value
+     * @param string $message
      */
-    public function assertCommandParameterHasBadType($parameter, $value)
+    public function assertCommandParameterHasBadType($parameter, $value, $message = '')
     {
-        $resolver = new OptionsResolver();
-        $command  = $this->getCommand();
-
-        // Use reflexion to call configureParameters method on command
-        $reflexionObject = new \ReflectionObject($command);
-        $reflexionMethod = $reflexionObject->getMethod('configureParameters');
-        $reflexionMethod->setAccessible(true);
-        $reflexionMethod->invokeArgs($command, [$resolver]);
-
         $parameters             = $this->getParameters();
         $parameters[$parameter] = $value;
 
-        try {
-            $resolver->resolve($parameters);
-            $this->fail('Exception should be thrown');
-        } catch (\Exception $e) {
-            $this->assertInstanceOf('Symfony\Component\OptionsResolver\Exception\InvalidOptionsException', $e);
-            $this->assertTrue(false !== strpos($e->getMessage(), sprintf('"%s"', $parameter)));
+        $violations = $this->getViolations($parameters);
+
+        $this->assertTrue($violations->count() > 0);
+        $this->assertEquals(sprintf('[%s]', $parameter), $violations[0]->getPropertyPath());
+        if (!empty($message)) {
+            $this->assertEquals($message, $violations[0]->getMessage());
         }
     }
 
@@ -65,25 +74,14 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
      */
     public function assertCommandParameterIsMandatory($parameter)
     {
-        $resolver = new OptionsResolver();
-        $command  = $this->getCommand();
-
-        // Use reflexion to call configureParameters method on command
-        $reflexionObject = new \ReflectionObject($command);
-        $reflexionMethod = $reflexionObject->getMethod('configureParameters');
-        $reflexionMethod->setAccessible(true);
-        $reflexionMethod->invokeArgs($command, [$resolver]);
-
         $parameters = $this->getParameters();
         unset($parameters[$parameter]);
 
-        try {
-            $resolver->resolve($parameters);
-            $this->fail('Exception should be thrown');
-        } catch (\Exception $e) {
-            $this->assertInstanceOf('Symfony\Component\OptionsResolver\Exception\MissingOptionsException', $e);
-            $this->assertTrue(false !== strpos($e->getMessage(), sprintf('"%s"', $parameter)));
-        }
+        $violations = $this->getViolations($parameters);
+
+        $this->assertEquals(1, $violations->count());
+        $this->assertEquals(sprintf('[%s]', $parameter), $violations[0]->getPropertyPath());
+        $this->assertEquals('This field is missing.', $violations[0]->getMessage());
     }
 
     /**
@@ -91,20 +89,9 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
      */
     public function assertCommandParametersAreValid(array $parameters)
     {
-        $resolver = new OptionsResolver();
-        $command  = $this->getCommand();
+        $violations = $this->getViolations($parameters);
 
-        // Use reflexion to call configureParameters method on command
-        $reflexionObject = new \ReflectionObject($command);
-        $reflexionMethod = $reflexionObject->getMethod('configureParameters');
-        $reflexionMethod->setAccessible(true);
-        $reflexionMethod->invokeArgs($command, [$resolver]);
-
-        try {
-            $this->assertEquals($parameters, $resolver->resolve($parameters));
-        } catch (\Exception $e) {
-            $this->fail($e->getMessage());
-        }
+        $this->assertEquals(0, $violations->count());
     }
 
     /**
@@ -112,24 +99,13 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
      */
     public function assertCommandParameterIsNotDefined($parameter)
     {
-        $resolver = new OptionsResolver();
-        $command  = $this->getCommand();
-
-        // Use reflexion to call configureParameters method on command
-        $reflexionObject = new \ReflectionObject($command);
-        $reflexionMethod = $reflexionObject->getMethod('configureParameters');
-        $reflexionMethod->setAccessible(true);
-        $reflexionMethod->invokeArgs($command, [$resolver]);
-
         $parameters             = $this->getParameters();
         $parameters[$parameter] = '';
 
-        try {
-            $resolver->resolve($parameters);
-            $this->fail('Exception should be thrown');
-        } catch (\Exception $e) {
-            $this->assertInstanceOf('Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException', $e);
-            $this->assertTrue(false !== strpos($e->getMessage(), sprintf('"%s"', $parameter)));
-        }
+        $violations = $this->getViolations($parameters);
+
+        $this->assertEquals(1, $violations->count());
+        $this->assertEquals(sprintf('[%s]', $parameter), $violations[0]->getPropertyPath());
+        $this->assertEquals('This field was not expected.', $violations[0]->getMessage());
     }
 }

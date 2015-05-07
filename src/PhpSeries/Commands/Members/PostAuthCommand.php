@@ -2,7 +2,7 @@
 namespace PhpSeries\Commands\Members;
 
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class PostAuthCommand
@@ -12,16 +12,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class PostAuthCommand extends AbstractCommand
 {
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    protected function configureParameters(OptionsResolver $resolver)
+    protected function getConstraint()
     {
-        $resolver->setRequired(['login', 'password'])
-            ->setAllowedTypes(
-                [
-                    'login'    => 'string',
-                    'password' => 'string'
+        return new Assert\Collection(
+            [
+                'fields' => [
+                    'login'    => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ],
+                    'password' => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ]
                 ]
-            );
+            ]
+        );
     }
 }

@@ -4,7 +4,9 @@ namespace PhpSeries\Commands;
 use Guzzle\Http\ClientInterface;
 use Guzzle\Http\Message\Response;
 use PhpSeries\Exceptions\BetaSeriesException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use PhpSeries\Exceptions\VariableException;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validation;
 
 /**
  * Class AbstractCommand
@@ -49,9 +51,9 @@ abstract class AbstractCommand implements CommandInterface
     }
 
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    abstract protected function configureParameters(OptionsResolver $resolver);
+    abstract protected function getConstraint();
 
     /**
      * @param string $method
@@ -59,19 +61,24 @@ abstract class AbstractCommand implements CommandInterface
      * @param array  $parameters
      *
      * @return Response
+     * @throws VariableException
      */
     protected function getHttpResponse($method, $url, array $parameters = [])
     {
         // define http method
         $method = strtoupper($method);
 
-        // Resolve parameters
-        $resolver = new OptionsResolver();
-        $this->configureParameters($resolver);
+        // Validate parameters
+        $validator  = Validation::createValidator();
+        $violations = $validator->validate($parameters, $this->getConstraint());
+
+        if ($violations->count() > 0) {
+            throw new VariableException($violations[0]->getPropertyPath() . ' : ' . $violations[0]->getMessage());
+        }
 
         // Filter resolved parameters to keep only non empty ones
         $parameters = array_filter(
-            $resolver->resolve($parameters),
+            $parameters,
             function ($value) {
                 return is_array($value) ? !empty($value) : '' != trim((string) $value);
             }

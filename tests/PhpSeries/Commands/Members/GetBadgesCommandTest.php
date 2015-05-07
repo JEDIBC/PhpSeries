@@ -38,8 +38,8 @@ class GetBadgesCommandTest extends CommandTestCase
         $this->assertCommandParametersAreValid($this->getParameters());
 
         // Bad types
-        $this->assertCommandParameterHasBadType('token', 666);
-        $this->assertCommandParameterHasBadType('id', 'oimhmoh');
+        $this->assertCommandParameterHasBadType('token', 666, 'This value should be of type string.');
+        $this->assertCommandParameterHasBadType('id', 'oimhmoh', 'This value should be of type integer.');
 
         // Mandatory parameters
         $this->assertCommandParameterIsMandatory('token');

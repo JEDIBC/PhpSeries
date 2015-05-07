@@ -24,7 +24,7 @@ class PostAuthCommandTest extends CommandTestCase
     protected function getParameters()
     {
         return [
-            'login' => 'foo',
+            'login'    => 'foo',
             'password' => 'bar'
         ];
     }
@@ -38,8 +38,8 @@ class PostAuthCommandTest extends CommandTestCase
         $this->assertCommandParametersAreValid($this->getParameters());
 
         // Bad types
-        $this->assertCommandParameterHasBadType('login', 666);
-        $this->assertCommandParameterHasBadType('password', 666);
+        $this->assertCommandParameterHasBadType('login', 666, 'This value should be of type string.');
+        $this->assertCommandParameterHasBadType('password', 666, 'This value should be of type string.');
 
         // Mandatory parameters
         $this->assertCommandParameterIsMandatory('login');

@@ -2,7 +2,7 @@
 namespace PhpSeries\Commands\Members;
 
 use PhpSeries\Commands\AbstractCommand;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class PostAccessTokenCommand
@@ -12,18 +12,32 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class PostAccessTokenCommand extends AbstractCommand
 {
     /**
-     * @param OptionsResolver $resolver
+     * @return Assert\Collection
      */
-    protected function configureParameters(OptionsResolver $resolver)
+    protected function getConstraint()
     {
-        $resolver->setRequired(['client_id', 'client_secret', 'redirect_uri', 'code'])
-            ->setAllowedTypes(
-                [
-                    'client_id'     => 'string',
-                    'client_secret' => 'string',
-                    'redirect_uri'  => 'string',
-                    'code'          => 'string'
+        return new Assert\Collection(
+            [
+                'fields' => [
+                    'client_id'     => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ],
+                    'client_secret' => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ],
+                    'redirect_uri'  => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string'),
+                        new Assert\Url()
+                    ],
+                    'code'          => [
+                        new Assert\NotBlank(),
+                        new Assert\Type('string')
+                    ]
                 ]
-            );
+            ]
+        );
     }
 }
