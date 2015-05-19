@@ -5,11 +5,11 @@ use PhpSeries\Commands\AbstractCommand;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Class GetBadgesCommand
+ * Class PostLostCommand
  *
  * @package PhpSeries\Commands\Members
  */
-class GetBadgesCommand extends AbstractCommand
+class PostLostCommand extends AbstractCommand
 {
     /**
      * @return Assert\Collection
@@ -19,17 +19,9 @@ class GetBadgesCommand extends AbstractCommand
         return new Assert\Collection(
             [
                 'fields' => [
-                    'token' => [
-                        new Assert\Optional(
-                            [
-                                new Assert\NotBlank(),
-                                new Assert\Type('string')
-                            ]
-                        ),
-                    ],
-                    'id'    => [
+                    'find' => [
                         new Assert\NotBlank(),
-                        new Assert\Type('integer')
+                        new Assert\Type('string')
                     ]
                 ]
             ]

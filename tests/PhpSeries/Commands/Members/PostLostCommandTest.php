@@ -4,18 +4,18 @@ namespace Tests\PhpSeries\Commands\Members;
 use Tests\PhpSeries\Commands\CommandTestCase;
 
 /**
- * Class PostAuthCommandTest
+ * Class PostLostCommandTest
  *
  * @package Tests\PhpSeries\Commands\Members
  */
-class PostAuthCommandTest extends CommandTestCase
+class PostLostCommandTest extends CommandTestCase
 {
     /**
      * @return string
      */
     protected function getCommandClassName()
     {
-        return '\PhpSeries\Commands\Members\PostAuthCommand';
+        return '\PhpSeries\Commands\Members\PostLostCommand';
     }
 
     /**
@@ -24,8 +24,7 @@ class PostAuthCommandTest extends CommandTestCase
     protected function getParameters()
     {
         return [
-            'login'    => 'foo',
-            'password' => 'bar'
+            'find' => 'azerty'
         ];
     }
 
@@ -38,12 +37,10 @@ class PostAuthCommandTest extends CommandTestCase
         $this->assertCommandParametersAreValid($this->getParameters());
 
         // Bad types
-        $this->assertCommandParameterError('login', 666, 'This value should be of type string.');
-        $this->assertCommandParameterError('password', 666, 'This value should be of type string.');
+        $this->assertCommandParameterError('find', 666, 'This value should be of type string.');
 
         // Mandatory parameters
-        $this->assertCommandParameterIsMandatory('login');
-        $this->assertCommandParameterIsMandatory('password');
+        $this->assertCommandParameterIsMandatory('find');
 
         // Not defined parameter
         $this->assertCommandParameterIsNotDefined('foobar');

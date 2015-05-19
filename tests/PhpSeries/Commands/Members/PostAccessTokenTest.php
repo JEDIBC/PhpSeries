@@ -40,11 +40,11 @@ class PostAccessTokenCommandTest extends CommandTestCase
         $this->assertCommandParametersAreValid($this->getParameters());
 
         // Bad types
-        $this->assertCommandParameterHasBadType('client_id', 666, 'This value should be of type string.');
-        $this->assertCommandParameterHasBadType('client_secret', 666, 'This value should be of type string.');
-        $this->assertCommandParameterHasBadType('redirect_uri', 666, 'This value should be of type string.');
-        $this->assertCommandParameterHasBadType('redirect_uri', 'gru', 'This value is not a valid URL.');
-        $this->assertCommandParameterHasBadType('code', 666, 'This value should be of type string.');
+        $this->assertCommandParameterError('client_id', 666, 'This value should be of type string.');
+        $this->assertCommandParameterError('client_secret', 666, 'This value should be of type string.');
+        $this->assertCommandParameterError('redirect_uri', 666, 'This value should be of type string.');
+        $this->assertCommandParameterError('redirect_uri', 'gru', 'This value is not a valid URL.');
+        $this->assertCommandParameterError('code', 666, 'This value should be of type string.');
 
         // Mandatory parameters
         $this->assertCommandParameterIsMandatory('client_id');

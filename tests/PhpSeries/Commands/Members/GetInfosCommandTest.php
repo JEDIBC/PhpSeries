@@ -4,18 +4,18 @@ namespace Tests\PhpSeries\Commands\Members;
 use Tests\PhpSeries\Commands\CommandTestCase;
 
 /**
- * Class GetBadgesCommandTest
+ * Class GetInfosCommandTest
  *
  * @package Tests\PhpSeries\Commands\Members
  */
-class GetBadgesCommandTest extends CommandTestCase
+class GetInfosCommandTest extends CommandTestCase
 {
     /**
      * @return string
      */
     protected function getCommandClassName()
     {
-        return '\PhpSeries\Commands\Members\GetBadgesCommand';
+        return '\PhpSeries\Commands\Members\GetInfosCommand';
     }
 
     /**
@@ -24,8 +24,10 @@ class GetBadgesCommandTest extends CommandTestCase
     protected function getParameters()
     {
         return [
-            'token' => 'azerty',
-            'id'    => 666
+            'token'   => 'azerty',
+            'id'      => 666,
+            'summary' => true,
+            'only'    => 'shows'
         ];
     }
 
@@ -40,10 +42,14 @@ class GetBadgesCommandTest extends CommandTestCase
         // Bad types
         $this->assertCommandParameterError('token', 666, 'This value should be of type string.');
         $this->assertCommandParameterError('id', 'oimhmoh', 'This value should be of type integer.');
+        $this->assertCommandParameterError('summary', 'oimhmoh', 'This value should be of type boolean.');
+        $this->assertCommandParameterError('only', 'gru', 'The value you selected is not a valid choice.');
 
         // Mandatory/optional parameters
         $this->assertCommandParameterIsOptional('token');
         $this->assertCommandParameterIsMandatory('id');
+        $this->assertCommandParameterIsOptional('summary');
+        $this->assertCommandParameterIsMandatory('only');
 
         // Not defined parameter
         $this->assertCommandParameterIsNotDefined('foobar');

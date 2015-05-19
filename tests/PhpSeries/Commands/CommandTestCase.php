@@ -55,7 +55,7 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
      * @param mixed  $value
      * @param string $message
      */
-    public function assertCommandParameterHasBadType($parameter, $value, $message = '')
+    public function assertCommandParameterError($parameter, $value, $message = '')
     {
         $parameters             = $this->getParameters();
         $parameters[$parameter] = $value;
@@ -85,13 +85,26 @@ abstract class CommandTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $parameter
+     */
+    public function assertCommandParameterIsOptional($parameter)
+    {
+        $parameters = $this->getParameters();
+        unset($parameters[$parameter]);
+
+        $violations = $this->getViolations($parameters);
+
+        $this->assertEquals(0, $violations->count());
+    }
+
+    /**
      * @param array $parameters
      */
     public function assertCommandParametersAreValid(array $parameters)
     {
         $violations = $this->getViolations($parameters);
 
-        $this->assertEquals(0, $violations->count());
+        $this->assertEquals(0, $violations->count(), (string) $violations);
     }
 
     /**
